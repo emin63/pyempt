@@ -33,7 +33,9 @@ __version__ = '1.0.21'
 def make_parser():
     """Make the parser to process the command line.
     """
-    parser = argparse.ArgumentParser(description=__doc__)
+    parser = argparse.ArgumentParser(
+        description=__doc__,
+        formatter_class=argparse.RawTextHelpFormatter)
     parser.add_argument('target', help='Target file to check.')
     parser.add_argument('--version', action='version', version=__version__)
     parser.add_argument('--disable', action='append', help=(
@@ -41,8 +43,8 @@ def make_parser():
         'to disable checkers. For example "--disable pep8" would\n'
         'disable the pep8 checker.'))
     parser.add_argument('--log_level', type=int, help=(
-        'Numeric python log level (e.g., %s=%i, %s=%i) for logging' % (
-            'DEBUG', logging.DEBUG, 'INFO', logging.INFO)))
+        'Numeric python log level (e.g., %s=%i, %s=%i)\n'
+        'for logging' % ('DEBUG', logging.DEBUG, 'INFO', logging.INFO)))
 
     return parser
 
