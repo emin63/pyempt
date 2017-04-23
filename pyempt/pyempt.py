@@ -28,7 +28,7 @@ import argparse
 import sys
 import logging
 
-__version__ = '1.0.22'
+__version__ = '1.0.23'
 
 def make_parser():
     """Make the parser to process the command line.
