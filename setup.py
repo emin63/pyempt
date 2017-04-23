@@ -1,20 +1,20 @@
 """Setup module for pyempt
 
-See https://github.com/emin63/pyempt/blob/master/README.txt for more
+See https://github.com/emin63/pyempt/blob/master/README.md for more
 details of pyempt
 """
 
 import codecs
 import os
 
-from setuptools import setup, find_packages
+from setuptools import setup
 
 def make_dynamic_kwargs():
     """Make dynamically generated keyword args for setup.
     """
     kwargs = {}
     here = os.path.abspath(os.path.dirname(__file__))
-    with codecs.open(os.path.join(here, 'README.txt'),
+    with codecs.open(os.path.join(here, 'README.rst'),
                      encoding='utf-8') as fdesc:
         kwargs['long_description'] = fdesc.read()
     print('kwargs = %s' % str(kwargs))
@@ -22,7 +22,7 @@ def make_dynamic_kwargs():
 
 setup(
     name='pyempt',
-    version='1.0.0',
+    version='1.0.9',
     description='A sample Python project',
     url='https://github.com/emin63/pyempt',
     author='Emin Martinian',
@@ -49,7 +49,7 @@ setup(
 
     keywords='continuous integration emacs development',
 
-    packages=find_packages(exclude=['contrib', 'docs', 'tests']),
+    packages=['pyempt'],
 
     # Alternatively, if you want to distribute just a my_module.py, uncomment
     # this:
@@ -57,9 +57,11 @@ setup(
 
     install_requires=['pylint', 'pep8'],
     extras_require={},
-    package_data={},
     data_files=[],
-
+    package_data={
+        'pyempt': ['pyempt/*'],
+    },
+    include_package_data=True,    
     entry_points={
         'console_scripts': [
             'pyempt=pyempt.pyempt:main'],
