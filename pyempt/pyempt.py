@@ -37,8 +37,8 @@ def run_checkers(args):
     """Do the work of running the various checkers.
     """
     result = []
-    pep8_cmd = ['pep8.exe', args.target]
-    pylint_cmd = ['pylint.exe', args.target, '-f', 'parseable', '-r', 'n',
+    pep8_cmd = ['pep8', args.target]
+    pylint_cmd = ['pylint', args.target, '-f', 'parseable', '-r', 'n',
                   '--include_ids=y']
     cmd_list = [pep8_cmd, pylint_cmd]
     for my_cmd in cmd_list:
