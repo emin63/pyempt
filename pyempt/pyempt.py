@@ -29,7 +29,7 @@ import sys
 import logging
 import re
 
-__version__ = '1.0.24'
+__version__ = '1.0.25'
 
 def make_parser():
     """Make the parser to process the command line.
@@ -56,7 +56,8 @@ def make_kill_regexps():
     those.
     """
     result = {
-        'pylint_rating' : '^[Yy]our code has been rated.*$'
+        'long_dash': r'^-+ *',
+        'pylint_rating': '^[Yy]our code has been rated.*$'
     }
     return result
 
@@ -90,7 +91,8 @@ def prepare_output(results):
     for name, data in results:
         for re_name, my_re in kill_regexps.items():
             logging.debug('Cleaning output of %s with re %s', name, re_name)
-            output.append(re.sub(my_re, '', data, flags=re.M))
+            data = re.sub(my_re, '', data, flags=re.M)
+        output.append(data)
     return output
 
 def main():
