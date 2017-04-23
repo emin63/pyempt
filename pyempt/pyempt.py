@@ -29,7 +29,7 @@ import sys
 import logging
 import re
 
-__version__ = '1.0.25'
+__version__ = '1.0.26'
 
 def make_parser():
     """Make the parser to process the command line.
