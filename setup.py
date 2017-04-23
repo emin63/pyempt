@@ -6,6 +6,7 @@ details of pyempt
 
 import codecs
 import os
+import re
 
 from setuptools import setup
 
@@ -17,12 +18,16 @@ def make_dynamic_kwargs():
     with codecs.open(os.path.join(here, 'README.rst'),
                      encoding='utf-8') as fdesc:
         kwargs['long_description'] = fdesc.read()
-    print('kwargs = %s' % str(kwargs))
+    with codecs.open(os.path.join(here, 'pyempt', 'pyempt.py'),
+                     encoding='utf-8') as fdesc:
+        data = fdesc.read()
+        vsre = r"^__version__ = ['\"]([^'\"]*)['\"]"
+        vers = re.search(vsre, data, re.M)
+        kwargs['version'] = vers.group(1)
     return kwargs
 
 setup(
     name='pyempt',
-    version='1.0.9',
     description='A sample Python project',
     url='https://github.com/emin63/pyempt',
     author='Emin Martinian',

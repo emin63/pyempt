@@ -25,26 +25,45 @@ source and you can modify freely provided credit is given to the author(s).
 
 import subprocess
 import argparse
+import sys
+import logging
+
+__version__ = '1.0.21'
 
 def make_parser():
     """Make the parser to process the command line.
     """
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('target', help='Target file to check.')
+    parser.add_argument('--version', action='version', version=__version__)
+    parser.add_argument('--disable', action='append', help=(
+        'You can provide as many --disable arguments as you like\n'
+        'to disable checkers. For example "--disable pep8" would\n'
+        'disable the pep8 checker.'))
+    parser.add_argument('--log_level', type=int, help=(
+        'Numeric python log level (e.g., %s=%i, %s=%i) for logging' % (
+            'DEBUG', logging.DEBUG, 'INFO', logging.INFO)))
+
     return parser
 
 def run_checkers(args):
     """Do the work of running the various checkers.
     """
     result = []
+    disable = args.disable
+    disable = set(disable) if disable else set([])
     pep8_cmd = ['pep8', args.target]
-    pylint_cmd = ['pylint', args.target, '-f', 'parseable', '-r', 'n',
-                  '--include_ids=y']
+    pylint_cmd = ['pylint', args.target, '-f', 'parseable', '-r', 'n']
     cmd_list = [pep8_cmd, pylint_cmd]
     for my_cmd in cmd_list:
+        if my_cmd[0] in disable:
+            logging.info('Disabling checker %s', my_cmd[0])
+            continue
         my_process = subprocess.Popen(my_cmd, stdout=subprocess.PIPE,
                                       stderr=subprocess.PIPE)
         output = my_process.stdout.read()
+        errs = my_process.stderr.read()
+        print(errs.decode('utf8'), file=sys.stderr)
         result.append(output.decode('utf8'))
     return result
 
@@ -56,6 +75,8 @@ def main():
     """
     parser = make_parser()
     args = parser.parse_args()
+    if args.log_level is not None:
+        logging.getLogger('').setLevel(args.log_level)
     result = run_checkers(args)
     print('\n'.join(result))
 
