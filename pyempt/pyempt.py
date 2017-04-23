@@ -27,8 +27,9 @@ import subprocess
 import argparse
 import sys
 import logging
+import re
 
-__version__ = '1.0.23'
+__version__ = '1.0.24'
 
 def make_parser():
     """Make the parser to process the command line.
@@ -48,6 +49,17 @@ def make_parser():
 
     return parser
 
+def make_kill_regexps():
+    """Make dictionary identifying regular expressions to remove from output.
+
+    Some of the checkers provide results that confuse pylint. So we remove
+    those.
+    """
+    result = {
+        'pylint_rating' : '^[Yy]our code has been rated.*$'
+    }
+    return result
+
 def run_checkers(args):
     """Do the work of running the various checkers.
     """
@@ -66,9 +78,20 @@ def run_checkers(args):
         output = my_process.stdout.read()
         errs = my_process.stderr.read()
         print(errs.decode('utf8'), file=sys.stderr)
-        result.append(output.decode('utf8'))
+        result.append((my_cmd[0], output.decode('utf8')))
+
     return result
 
+def prepare_output(results):
+    """Cleanup the results and prepare them for output.
+    """
+    kill_regexps = make_kill_regexps()
+    output = []
+    for name, data in results:
+        for re_name, my_re in kill_regexps.items():
+            logging.debug('Cleaning output of %s with re %s', name, re_name)
+            output.append(re.sub(my_re, '', data, flags=re.M))
+    return output
 
 def main():
     """Run the main program.
@@ -80,7 +103,8 @@ def main():
     if args.log_level is not None:
         logging.getLogger('').setLevel(args.log_level)
     result = run_checkers(args)
-    print('\n'.join(result))
+    clean_output = prepare_output(result)
+    print('\n'.join(clean_output))
 
 if __name__ == '__main__':
     main()
