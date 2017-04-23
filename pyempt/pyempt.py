@@ -68,7 +68,11 @@ def run_checkers(args):
     disable = args.disable
     disable = set(disable) if disable else set([])
     pep8_cmd = ['pep8', args.target]
-    pylint_cmd = ['pylint', args.target, '-f', 'parseable', '-r', 'n']
+    pylint_cmd = [
+        'pylint', args.target, '-f', 'parseable', '-r', 'n',
+        '--disable', 'locally-disabled',  # stop pylint spam about disabled ids
+        ]
+
     cmd_list = [pep8_cmd, pylint_cmd]
     for my_cmd in cmd_list:
         if my_cmd[0] in disable:
