@@ -27,6 +27,7 @@ import subprocess
 import argparse
 import sys
 import logging
+import re
 
 __version__ = '1.1.0'
 
@@ -50,6 +51,19 @@ def make_parser():
     return parser
 
 
+def make_kill_regexps():
+    """Make dictionary identifying regular expressions to remove from output.
+
+    Some of the checkers provide results that confuse pylint. So we remove
+    those.
+    """
+    result = {
+        'long_dash': r'^-+ *',
+        'pylint_rating': '^[Yy]our code has been rated.*$'
+    }
+    return result
+
+
 def run_checkers(args):
     """Do the work of running the various checkers.
 
@@ -71,10 +85,13 @@ def run_checkers(args):
     disable = args.disable
     disable = set(disable) if disable else set([])
     pep8_cmd = ['pep8', args.target]
-    pylint_cmd = ['pylint', args.target, '-f', 'parseable', '-r', 'n']
-    cmd_list = [('pep8', pep8_cmd), ('pylint', pylint_cmd)]
+    pylint_cmd = [
+        'pylint', args.target, '-f', 'parseable', '-r', 'n',
+        '--disable', 'locally-disabled',  # stop pylint spam about disabled ids
+        ]
+    cmd_list = [pep8_cmd, pylint_cmd]
     retcode = None
-    for my_name, my_cmd in cmd_list:
+    for my_cmd in cmd_list:
         if my_cmd[0] in disable:
             logging.info('Disabling checker %s', my_cmd[0])
             continue
@@ -87,9 +104,22 @@ def run_checkers(args):
         if my_process.returncode:  # only change retcode on err code
             retcode = my_process.returncode
             logging.info('Checker %s produced return code %s',
-                         my_name, retcode)
-        result.append(output.decode('utf8'))
+                         my_cmd[0], retcode)
+        result.append((my_cmd[0], output.decode('utf8')))
     return retcode, result
+
+
+def prepare_output(results):
+    """Cleanup the results and prepare them for output.
+    """
+    kill_regexps = make_kill_regexps()
+    output = []
+    for name, data in results:
+        for re_name, my_re in kill_regexps.items():
+            logging.debug('Cleaning output of %s with re %s', name, re_name)
+            data = re.sub(my_re, '', data, flags=re.M)
+        output.append(data)
+    return output
 
 
 def main():
@@ -106,9 +136,12 @@ def main():
     args = parser.parse_args()
     if args.log_level is not None:
         logging.getLogger('').setLevel(args.log_level)
+
     retcode, result = run_checkers(args)
-    print('\n'.join(result))
+    clean_output = prepare_output(result)
+    print('\n'.join(clean_output))
     return retcode if retcode else 0
+
 
 if __name__ == '__main__':
     sys.exit(main())

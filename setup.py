@@ -29,7 +29,7 @@ def make_dynamic_kwargs():
 
 setup(
     name='pyempt',
-    description='A sample Python project',
+    description='Python emacs syntax checking',
     url='https://github.com/emin63/pyempt',
     author='Emin Martinian',
     author_email='emin.martinian@gmail.com',
