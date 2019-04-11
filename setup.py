@@ -10,6 +10,7 @@ import re
 
 from setuptools import setup
 
+
 def make_dynamic_kwargs():
     """Make dynamically generated keyword args for setup.
     """

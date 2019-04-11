@@ -37,6 +37,26 @@ your `~/.emacs` file to run pyempt.
 After you restart emacs or reload your init file, flymake should automatically
 start and call pyempt.
 
+# Usage
+
+If you have installed pyempt and setup emacs to use it in flymake,
+there isn't anything you need to do to use pyempt. Instead, it will
+run automatically inside emacs.
+
+If you want to run it from the command line, you can type
+
+    pyempt --help
+	
+to see options and usage instructions or type
+
+    pyempt <PATH_TO_CHECK>
+	
+to run checks on everything in a given path. 
+
+Since pyempt will return a non-zero exit code if any of its checkers
+returns a non-zero code, you can simply check the return value of
+pyempt in build scripts or continuous integration tools.
+
 # Troubleshooting
 
 If you have problems, the first thing to do is to try and run pyempt manually

@@ -28,7 +28,8 @@ import argparse
 import sys
 import logging
 
-__version__ = '1.0.22'
+__version__ = '1.1.0'
+
 
 def make_parser():
     """Make the parser to process the command line.
@@ -48,39 +49,66 @@ def make_parser():
 
     return parser
 
+
 def run_checkers(args):
     """Do the work of running the various checkers.
+
+    :param args:     Parsed args from argparse.
+
+    ~-~-~-~-~-~-~-~-~-~-~-~-~-~-~-~-~-~-~-~-~-~-~-~-~-~-~-
+
+    :return:  The pair (RETCODE, RESULT).  RETCODE is 0
+              if all checkers returned 0 and the last non-zero
+              exit code if one of the checkers returned a non-zero
+              code. RESULT is the string of all checker outputs.
+
+    ~-~-~-~-~-~-~-~-~-~-~-~-~-~-~-~-~-~-~-~-~-~-~-~-~-~-~-
+
+    PURPOSE:  Run the checkers, collect output, and return exit code.
+
     """
     result = []
     disable = args.disable
     disable = set(disable) if disable else set([])
     pep8_cmd = ['pep8', args.target]
     pylint_cmd = ['pylint', args.target, '-f', 'parseable', '-r', 'n']
-    cmd_list = [pep8_cmd, pylint_cmd]
-    for my_cmd in cmd_list:
+    cmd_list = [('pep8', pep8_cmd), ('pylint', pylint_cmd)]
+    retcode = None
+    for my_name, my_cmd in cmd_list:
         if my_cmd[0] in disable:
             logging.info('Disabling checker %s', my_cmd[0])
             continue
         my_process = subprocess.Popen(my_cmd, stdout=subprocess.PIPE,
                                       stderr=subprocess.PIPE)
+        my_process.wait()
         output = my_process.stdout.read()
         errs = my_process.stderr.read()
         print(errs.decode('utf8'), file=sys.stderr)
+        if my_process.returncode:  # only change retcode on err code
+            retcode = my_process.returncode
+            logging.info('Checker %s produced return code %s',
+                         my_name, retcode)
         result.append(output.decode('utf8'))
-    return result
+    return retcode, result
 
 
 def main():
     """Run the main program.
 
     This is the main entry point executed when the script is run.
+
+    If any checker returns a non-zero exit code, this function
+    will return a non-zeo code. This makes it easy to run
+    a bunch of checkers and see if any fail using something
+    like `pyempt PATH || echo "pyempt found problems""`.
     """
     parser = make_parser()
     args = parser.parse_args()
     if args.log_level is not None:
         logging.getLogger('').setLevel(args.log_level)
-    result = run_checkers(args)
+    retcode, result = run_checkers(args)
     print('\n'.join(result))
+    return retcode if retcode else 0
 
 if __name__ == '__main__':
-    main()
+    sys.exit(main())
