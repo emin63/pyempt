@@ -77,5 +77,5 @@ You can get further help on the command line program via
 If you want to fork pyempt, you may find the following useful:
 
   1. The `README.md` file is the main file. Generate the rst version via something like `pandoc README.md -t rst > README.rst`
-  2. Upload to pypi via something like `rm -f dist/* && python3 setup.py sdist && twine upload dist/*`
+  2. Upload to pypi via something like `make pypi` provided you have your `~/.pypirc` setup correctly.
     
